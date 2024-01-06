@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 
+
 class Customer {
   int? id;
   String? fullName;
@@ -15,7 +16,7 @@ class Customer {
   Map<String, dynamic> toJson() => {
     'id':id,
     'fullName': fullName,
-    'birthDay': birthDay,
+    'birthDay': birthDay?.toIso8601String(),
     'address': address,
     'phoneNumber': phoneNumber
   };
@@ -51,13 +52,18 @@ Future<void> createCustomer() async {
   print('fullName:');
   var fullName = stdin.readLineSync()!;
   print('BirthDay:');
-  var birthDay = int.parse(stdin.readLineSync()!);
+  DateTime birthDay = DateTime.parse(stdin.readLineSync()!);
   print('Address:');
   var address = stdin.readLineSync()!;
-  print("phone Number:");
-  var phoneNumber= int.parse(stdin.readLineSync()!);
+  print("Phone Number:");
+  var phoneNumber = int.parse(stdin.readLineSync()!);
 
-  var customer = Customer(fullName, birthDay, address,phoneNumber);
+  var customer = Customer(
+    fullName: fullName,
+    birthDay: birthDay,
+    address: address,
+    phoneNumber: phoneNumber,
+  );
 
   var response = await http.post(Uri.parse(baseUrl),
       headers: {'Content-Type': 'application/json'},
@@ -76,7 +82,8 @@ Future<void> readAllCustomers() async {
     var customers = jsonDecode(response.body);
     print('All Customers:');
     customers.forEach((customer) {
-      print('ID: ${customer['id']}, Name: ${customer['name']}, Age: ${customer['age']}, Address: ${customer['address']}');
+      print('ID: ${customer['id']}, Name: ${customer['fullName']}, BirthDay: ${DateTime.parse(customer['birthDay'])},'
+          ' Address: ${customer['address']}, Phone number: ${customer['phoneNumber']}');
     });
   } else {
     print('Error reading customers. Status code: ${response.statusCode}');
